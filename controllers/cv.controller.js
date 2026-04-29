@@ -1,5 +1,5 @@
 const puppeteer = require("puppeteer-core");
-
+const chromium = require("@sparticuz/chromium");
 exports.generateCV = async (req, res) => {
   try {
     const {
@@ -22,10 +22,9 @@ exports.generateCV = async (req, res) => {
     });
 
     const browser = await puppeteer.launch({
-      headless: "new",
-      executablePath:
-        "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
-      args: ["--no-sandbox", "--disable-setuid-sandbox"],
+      executablePath: await chromium.executablePath(),
+      args: chromium.args,
+      headless: chromium.headless,
     });
 
     const page = await browser.newPage();

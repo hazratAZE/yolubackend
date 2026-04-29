@@ -8,7 +8,6 @@ const app = express();
 
 app.use(cors());
 app.use(express.json());
-
 app.use("/api/cv", cvRoutes);
 app.use("/api/system", systemRoutes);
 

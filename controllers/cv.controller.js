@@ -1,28 +1,32 @@
 const PDFDocument = require("pdfkit");
+const fs = require("fs");
+const path = require("path");
 
-exports.generateCV = (req, res) => {
+exports.generateCV = async (req, res) => {
   const { education } = req.body;
 
-  const doc = new PDFDocument({ margin: 40 });
+  const fileName = `cv-${Date.now()}.pdf`;
+  const filePath = path.join(__dirname, "../uploads", fileName);
 
-  res.setHeader("Content-Type", "application/pdf");
-  res.setHeader("Content-Disposition", "attachment; filename=cv.pdf");
+  const doc = new PDFDocument();
 
-  doc.pipe(res);
+  doc.pipe(fs.createWriteStream(filePath));
 
-  doc.fontSize(18).text("Education CV", { align: "center" });
-  doc.moveDown(2);
+  doc.fontSize(18).text("Education CV");
+  doc.moveDown();
 
-  if (!education || education.length === 0) {
-    doc.fontSize(12).text("No education data provided");
-  } else {
-    education.forEach((e) => {
-      doc.fontSize(14).text(e.school || "");
-      doc.fontSize(11).text(`${e.degree || ""} - ${e.field || ""}`);
-      doc.fontSize(10).text(`${e.startYear || ""} - ${e.endYear || ""}`);
-      doc.moveDown();
-    });
-  }
+  education?.forEach((e) => {
+    doc.fontSize(12).text(e.school || "");
+    doc.fontSize(10).text(`${e.degree || ""} - ${e.field || ""}`);
+    doc.moveDown();
+  });
 
   doc.end();
+
+  doc.on("finish", () => {
+    res.json({
+      success: true,
+      url: `https://yolubackend.onrender.com/uploads/${fileName}`,
+    });
+  });
 };
